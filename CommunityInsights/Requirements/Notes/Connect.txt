@@ -1,0 +1,244 @@
+
+
+
+RMS?
+Insights Brokers? from diagrams
+What is Demand? and who are the users for creating demand? demand will be created for whom? How it is linked to RMS
+
+Technical Components
+•	PowerApps
+•	Dataverse
+•	AzureAD (MS Entra)
+•	NEC Broker
+•	License Manager ‘Module’ - reuse
+•	Audit Manager ‘Module’ - reuse
+•	Licence Manager
+
+
+New		- Demand Creation, Insights Apps
+New/Reuse	- Broker [Depends on level of change for Insights vs MobileID]
+Reuse		- Licence Manager Module, Audit/Logging Module [From OIFR/MobileID]
+
+
+3 Apps:
+•	Insight Demand Creation - PowerApp app - tablet/desktop - super user. Demand list/view/edit/add
+•	Community Insights - PowerApp - mobile/tablet device - user. Maps, Demand list/view/edit
+•	Insights Management/Admin - Web App - tablet/desktop - admin user
+
+
+Data Dictionary - No inference intended here in the data storage structure / design beyond the elements being needed and a suggestion as to how the objects could be stored, grouped and normalised.
+
+Data Dictionary:
+1. Demand
+2. DaysActive
+3. Related Person
+4. Demand Required Activities
+5. Demand Required Activity Responses
+6. Demand Activity Responders
+Below are subset tables
+7. Risk Categories
+8. Risk Ratings
+9. Demand Types
+10. Activities
+11. Activity Responses
+12. Staff Members
+13. Staff Teams
+14. Config Data - All config properties should be editable in the Portal UI except those marked with a *.
+
+
+Admin Screens:
+1. Splash Screen/Landing Page
+2. Config View - view/edit settings and export
+3. Audit Log View - view and export
+
+
+Management / Portal: It should behave here exactly as the one detailed in the Insights Demand Creation Application.
+Queries from Page 31. Homepage - options to view Activity, view configuration of the Brokers, the Insights App, the Demand App, and the Portal.
+Pages/Actions:
+1. Splash Screen
+2. Logging into the App should be tracked/audited.
+3. Broker/Middleware Configuration - 10 parameters - e.g. future adapter configuration for RMS, HR and CAD (about phase 2,3 and 4 work)
+4. Demand Creation App Configuration - total 13 parameters - e.g. demand types, actions, max geolocation radius, etc
+	- 7 tables - 5 config parameters to be updated in tables e.g. -	Demand Types, Demand Actions, Demand Responses, Risk Categories, Risk Ratings
+	- 1 Config table to update 5 parameters -	Max Location Radius, Max Geofence Area, ForceID, Reference Prefix, Location Validation Method & Detail (i.e. URI) in column "Gazetter Connection URI", 
+	-	Staff / Team Validation source? - 2 tables will be updated from connectors - Staff/Team
+	- 2 parameters missing in table - Maximum Activities per Demand, Application Timeout? where to store this info
+5. Insights App Configuration - 6 parameters - e.g. min/max map zoom
+6. Solution/Environment Config - 3 paramaters - e.g. Staff List, Team List, App timeout
+7. Portal/NEC Specified Config - 1 parameter - e.g. session timeout
+8. Audit Log View/Query - e.g. list (paging, sorting), show old/new, filter, export, again audit each action within audit, etc
+
+Config Data:
+------------
+ForceID - UI
+Demand Reference Prefix - UI
+*Demand Sequence Number
+Gazetter Connection URI - UI
+RMS Connection URI 
+HR Connection URI
+CAD Connection URI
+Max Location Radius - UI
+Max Geofence Area - UI
+Max Related Persons 
+Max records returned 
+Max Zoom Level on Map
+
+
+Admin - Manage Insights Configuration - 6 parameters
+----------------------------------------------
+where this configuration will be stored?
+
+Maximum Responders
+Default Map Zoom
+Max Map Zoom - config table
+Min Map Zoom
+Maximum Records Shown - config table
+Application Timeout
+
+
+Admin - Manage Shared / Solution Config - 3 parameters
+-----------------------------------------------
+where this configuration will be stored?
+
+- Staff List
+- Team List
+- Application Timeout
+
+
+Admin - Portal Configuration
+---------------------------------------
+where this configuration will be stored?
+- Session Timeout
+
+
+Licence Structure/Codes?
+
+Questions:
+App should run offline?
+what is the exact use of broker? it will be connector to external APIs but what response we expect from the broker.
+Audit Manager ‘Module’ - reuse. Can this be used in powerapp as well as in admin portal? In admin portal, there is section for audit log view/query.
+
+Output from the document:
+1. estimates
+2. design
+3. solution documentation
+
+
+Showcase knowledge on -
+connectors - on broker insights, they need dynamic connectors to be plugged in
+powerapps
+
+
+Admin Estimate Screens:
+------------------------
+
+Admin - Manage Demand Configuration - 13 parameters - 7 medium and rest are simple - 30 days
+Admin - Manage Insights Configuration - 6 parameters - 6 simple - 5 days
+Admin - Manage Shared / Solution Config - 3 parameters - 3 medium - 2 days
+Admin - Portal Configuration - 1 parameter - 1 simple - 1 days
+Admin - Broker Configuration?
+Admin - Splash Screen Configurations for 2 apps - superuser and user - 20 days
+Admin - Audit View - 20 days
+
+
+Queries:
+
+
+- How the app is used by different customers/organisations? the infra will remain same for different customers OR it will be different?
+
+- Insights Broker - Adapter/Connector 
+	- SOAP/REST - Can we get the pole API doc? At what event the adapters will be triggered to pull contents from different connectors? Where the adaptors to be placed? It will be triggered by Admin from Portal UI and then it will be updating the supplementary dataset? e.g. Risk Rating from RMS
+	- Can you send Pole API document POLE Data Standards Catalogue v1.0.docx. 
+	- Also the visio diagrams e.g. App Login process
+
+- SQL table - ForceID? what does it represent? It is 2 digit unique code, but it is related to client or something else
+
+- In Admin - Demand Configuration (Page 33) - Total 13 parameters
+	- Staff / Team Validation source - when the Staff/Teams table will be updated? (Admin will trigger OR Insights app wil trigger connector)? Are you expecting here to get data from connectors and perform validation before updating Staff/Team members table in dataverse OR it will be dynamic call from powerapp directly to pull staff/team (when it will update Staff/Teams table)?
+	-	Staff / Team Validation source? - 2 tables will be updated from connectors - Staff/Team
+	- 2 parameters missing in table - Maximum Activities per Demand, Application Timeout? where to store this info
+
+- Admin - Manage Insights Configuration - Total 6 parameters	
+	- Only two parameters (Max Map Zoom & Maximum Records Shown) can be stored in config table. what about others? (Maximum Responders, Default Map Zoom, 
+Min Map Zoom, Application Timeout)
+
+- Admin - Manage Shared / Solution Config - Total 3 parameters
+	- Staff/Team will be stored in respective tables, but where to store Application Timeout?
+where this configuration will be stored?
+
+- Admin - Portal Configuration
+	- Session Timeout, where to store?
+	
+- Admin - Broker Configuration - Total 8 and more Parameters in future
+	- Where to store this info? Page 32. Assuming it will be stored in some separate DB/Cloud? If yes then will you created DB?
+
+- Admin - Audit Log View/Query
+	- Can we re-use audit log/view if all the app configurations are stored in dataverse? OR need to build new interface?
+	
+- Calling dataverse API from Admin app will require license?
+	
+- Assuming Supplementary Datasets datasets (around 8 config tables) will this be part of dataverse? And No need to develop new APIs for the same
+
+- Spalsh Screens for Insights Demand Creation
+ - Controls are controlled by configurable settings (toggle/Boolean) that indicates if the force wishes to show these or not. Splash screen controls are not show in Admin configurable screens?
+ 
+- Admin - Splash Screen Configuration - stored where?
+	
+- License Structure/Codes?
+
+
+
+
+To ask in meeting:
+1. Reporting - demands from dataverse is problmetic
+2. Adapter/Connector configuration can be done in Broker API config. No configuration screen will be done in Admin portal.
+3. Document has added two different demand search filters, conflicting:
+
+Page 14 - demand search filters:
+•	Demand Reference
+•	Enabled (Yes / No)
+•	Demand Type
+•	Owning Staff Member
+•	Owning Team
+•	Location and Proximity to that Location in metres
+
+Page 25: demand search with different filters:
+-	State
+-	Creation Date Range (From – To)
+-	Last Modified Date Range (From – To)
+-	Assigned to Staff/Team
+
+
+Challenges - Ahmed:
+1. Insights - maps/list - showing nearest location demand on top?
+2. Demand/Insights - maps - min/max zoom
+3. Demand/Insights - maps - showing details on pin
+4. Demand/Insights - Search Filter options are from multiple tables. check the feasibility in dataverse
+5. Demand - Create - Setting location or placing pin and getting location details (datatype to be matched with DB fields)
+
+
+Powerapps - many controls layout is different for mobile layout and web app layout. Estimate need to be reviewed.
+
+	
+General SQL Tables Suggestion:
+1. Activities in Demand table - Can we have new column "ActivityID" in existing table "Demand Required Activities"
+
+	
+	
+POLE PDS Standards? - page 23 - reference to POLE Data Standards Catalogue v1.0.docx in main doc
+
+Visio diagrams? App login process
+
+Activities is an object in table Demand - I think we need separate table Activities (reference table)
+
+We don't need 14 admin screens? we just need admin screens to update app level config and demand config. And audit screens. Assuming we can re-use audit log if config tables are in dataverse. Phase 1 and Phase 2 - have similar requirement on config data, how to extend additional settings in config data.
+
+License Structure/Codes?
+
+Once connecter is configured, do we need to pull data from RMS and push it to dataverse? If yes, then at what frequency the dataverse will be refreshed. Also at what point in time, the data will be validated? e.e. when staff/team is shown on demand, while saving demand we need to validate staff/team OR during dataverse refresh activity the staff/team will be validated.
+
+when RMS is configured, and when user creates demand then
+
+
+Out of Scope:
+1. the feature that is not supported on powerapp components e.g. zoom level cannot be supported on Azure maps

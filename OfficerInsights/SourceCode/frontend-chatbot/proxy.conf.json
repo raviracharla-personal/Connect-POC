@@ -1,0 +1,7 @@
+{
+  "/api": {
+    "target": "http://43.204.127.40/officer-insights-api",
+    "secure": false,
+    "changeOrigin": true
+  }
+}

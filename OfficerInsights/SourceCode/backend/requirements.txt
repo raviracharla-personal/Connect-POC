@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+openai
+python-multipart
+azure-cognitiveservices-speech
+ffmpeg-python
+dateparser

@@ -1,0 +1,248 @@
+- Pre-requisites:
+Convert word doc to PDF
+	- Remove RETSRTICTED label OR any other label from the word doc 
+	- Remove NEC image & section details from the header 
+	- Remove text "NEC Connect 25.0 Investigation Management " from the footer
+	- Save it as PDF document
+
+-- Content Extraction from PDF and store it into JSON:
+python -m venv venv
+venv\Scripts\activate
+
+python -m pip install -r requirements.txt
+
+
+python chunker_pdf.py
+
+
+-- Ingestion of chunks int Qdrant vector DB:
+Part 1: Installing and Running Qdrant Natively (Without Docker)
+	download qdrant from https://github.com/qdrant/qdrant/releases [go to assets]
+	download to some location e.g. C:\connect\L&D\pre-requisites
+	add this location to the environment variable
+	open command prompt and run this command: qdrant
+	download qdrant web-ui from https://github.com/qdrant/qdrant-web-ui
+		- download and unzip to some location e.g. C:\connect\L-D\pre-requisites\qdrant-x86_64-pc-windows-msvc\qdrant-web-ui-master
+		- command prompt: cd "C:\connect\L-D\pre-requisites\qdrant-x86_64-pc-windows-msvc\qdrant-web-ui-master"
+		- command prompt: npm install
+		- command prompt: npm start
+	Qdrant DB: http://localhost:6333/
+	Qdrant Dashboard: http://localhost:5173/
+
+Part 2: Preparing the Python Environment:
+	python -m pip install -r requirements.txt
+	
+Part 3: The Python Script to Ingest Data
+	python ingest_to_qdrant.py
+	
+
+
+-- Streamlit and API Code Setup and Run
+Part 1: UI Setup:
+	cd C:\connect\L-D\frontend-streamlit
+	pip install -r requirements.txt
+	streamlit run ui.py
+	
+Part 2: API Setup
+	cd C:\connect\L-D\backend
+	pip install -r requirements.txt
+	uvicorn api:app --reload --env-file .env --host localhost --port 8500
+	#uvicorn api:app --reload --env-file .env --host 0.0.0.0 --port 8500
+
+
+-- TO RUN API on HTTPS:
+1. openssl req -x509 -newkey rsa:4096 -nodes -out "c:\IET\connect-cert-1.pem" -keyout "c:\IET\connect-key-1.pem" -days 3650 -subj "/CN=10.102.176.137"
+ -- this IP should be server IP on which API is Running
+ 
+2. Copy thie .pem files to backend folder
+
+3. uvicorn api:app --env-file .env --host 10.102.176.137 --port 8500 --reload --ssl-keyfile ./connect-local-cert.pem --ssl-certfile ./connect-local-cert.pem
+
+
+Starting and Managing Investigations
+--------------------------------------
+I'm at my desk. How do I start a brand new investigation report? - working
+I need to find an old case file from last month. How do I search for it? - not working
+How can I see a list of just my open cases and not everyone else's? - not working
+I have two cases that are connected. How can I link them together in the system? - not working
+I've finished my report and it's ready for review. What does the "Finalise Report" button actually do? - not working
+
+Adding Details to a Case (Working with "Cards")
+----------------------------------------------------
+I have a suspect's details. How do I add them as a person to my case file? - working
+How do I mark someone specifically as a "Victim" or "Witness" in the report? - working without showing source
+I need to add a car's information to a traffic accident report. How do I do that? - working
+How do I record the exact address where the crime happened? - working
+I accidentally added the wrong person to my case. How can I remove them safely? (This relates to "soft delete"). - not working
+
+Managing Tasks and Evidence
+-------------------------------
+I need my partner to follow up on a lead. How do I create a task for them in the system? - not working
+How do I upload a photo or a scanned witness statement to my case? - WORKING
+I need to write down some quick notes about a phone call. Where do I add that? - working
+How can I print a summary of my whole investigation for a court file? - NOT WORKING
+How can I see who else has worked on this case and what changes they made? (This relates to the "History" or audit trail).
+
+
+
+-------------------------
+
+Test an API:
+
+Simple:
+curl --location 'http://127.0.0.1:8000/ask' \
+--header 'Content-Type: application/json' \
+--data '{"question": "I have a suspect'\''s details. How do I add them as a person to my case file?"}'
+
+
+Output:
+{
+    "question": "I have a suspect's details. How do I add them as a person to my case file?",
+    "answer": "To add a suspect to your case file, select the Suspect card from +Add / Remove Cards. Click the Suspect Card to display the list of suspects, then click +Add Suspect. Enter at least the minimum search criteria specified at the top of the card. Click Next. If a matching record is found, click the matching record and then click 'This is the suspect' to link them to the investigation. Enter any additional information known about the suspect, including descriptive details, safeguarding risk assessments, and suspect information. If no matching record is found, click 'None of these people are Suspect' to create a new person record and link the suspect to the investigation. Complete all mandatory information, as indicated by tabs marked with a red star. Click Return to List or Return to Cards to update the Suspect card to Complete. Additional suspects can be added by clicking Add Suspect.",
+    "validatedSource": [
+        {
+            "section_number": "6.1.8",
+            "section_title": "Add a suspect",
+            "page_number": 22
+        }
+    ],
+    "rawSources": [
+        {
+            "section_number": "6.1.8",
+            "section_title": "Add a suspect",
+            "page_number": 21,
+            "chunk": "If required a linked identifiable or non-identifiable suspect can be added ...",
+            "similarity_score": 0.64171565
+        },
+        {
+            "section_number": "6.1.7",
+            "section_title": "Add linked persons to an Investigation",
+            "page_number": 20,
+            "chunk": "If required, linked persons can be added to an Investigation, ...",
+            "similarity_score": 0.58619756
+        },
+        {
+            "section_number": "6.1.36",
+            "section_title": "Add person reporting",
+            "page_number": 73,
+            "chunk": "Carry out the following steps to add details of the person reporting the missing person, ...",
+            "similarity_score": 0.551065
+        }
+    ]
+}
+
+----
+Conversation:
+curl --location 'http://127.0.0.1:8000/ask' \
+--header 'Content-Type: application/json' \
+--data '{
+  "question": "And how do I add their car?",
+  "history": [
+    {
+      "role": "user",
+      "content": "How do I add a person to a case?"
+    },
+    {
+      "role": "assistant",
+      "content": "To add a person to a case, you need to use the '\''Create Person'\'' card within the investigation report. This allows you to enter their details and assign them a role such as '\''Victim'\'' or '\''Witness'\''."
+    }
+  ]
+}'
+
+--------------
+
+
+
+{
+    "text": "I need to report a vehicle interference incident",
+    "history": [
+        {
+            "role": "assistant",
+            "content": "What is the VRM?"
+        },
+        {
+            "role": "user",
+            "content": "AB12 CDE"
+        },
+        {
+            "role": "assistant",
+            "content": "What is the vehicle make and model?"
+        },
+        {
+            "role": "user",
+            "content": "Ford Focus"
+        },
+        {
+            "role": "assistant",
+            "content": "What is the Victim's Name?"
+        },
+        {
+            "role": "user",
+            "content": "John Smith"
+        },
+        {
+            "role": "assistant",
+            "content": "What is the Victim's Address?"
+        },
+        {
+            "role": "user",
+            "content": "45 Oak Road, Manchester"
+        },
+        {
+            "role": "assistant",
+            "content": "What is the Victim's Date of Birth?"
+        },
+        {
+            "role": "user",
+            "content": "15/03/1980"
+        },
+        {
+            "role": "assistant",
+            "content": "Has the vehicle been damaged?"
+        },
+        {
+            "role": "user",
+            "content": "Yes"
+        },
+        {
+            "role": "assistant",
+            "content": "Describe the damage"
+        },
+        {
+            "role": "user",
+            "content": "Passenger window smashed"
+        },
+        {
+            "role": "assistant",
+            "content": "Is any CCTV available?"
+        },
+        {
+            "role": "user",
+            "content": "Yes"
+        },
+        {
+            "role": "assistant",
+            "content": "Where can the CCTV be accessed?"
+        },
+        {
+            "role": "user",
+            "content": "City Electronics shop opposite"
+        },
+        {
+            "role": "assistant",
+            "content": "Does the Victim know what property has been taken?"
+        },
+        {
+            "role": "user",
+            "content": "Yes"
+        },
+        {
+            "role": "assistant",
+            "content": "What property has been taken?"
+        },
+        {
+            "role": "user",
+            "content": "Laptop and mobile phone"
+        }
+    ]
+}

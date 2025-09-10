@@ -1,0 +1,30 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [    
+
+        {
+            "name": "Python: Backend",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "python",
+            "args": [
+                "chunker:main"
+            ],
+            "cwd": "${workspaceFolder}",
+            "jinja": true,
+            "justMyCode": true
+        },
+        {
+            "name": "Python: chunker (current file)",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/chunker_pdf.py",
+            "console": "integratedTerminal",
+            "args": ["--input", "Connect Investigation Training Manual v25.0.pdf", "--output", "out.json"]
+        }
+
+    ]
+}

@@ -1,0 +1,391 @@
+# Steps to run the app locally
+
+#URL for testing - Public:
+http://43.204.127.40/officer-insights-ui/
+
+Pre-requistes:
+Node v22.18.0
+Python v3.13.5
+
+API need this:
+Manual FFmpeg Installation (The Safe Way)
+This is the only prerequisite. It does not use Chocolatey and is entirely self-contained.
+Download: Go to https://www.gyan.dev/ffmpeg/builds/ and download the ffmpeg-release-full.7z file from the release builds.
+Extract: Use a tool like 7-Zip to extract the archive. You will get a folder like ffmpeg-6.1.1-full_build.
+Place it: Create a folder named C:\ffmpeg and move the extracted folder into it. Your ffmpeg.exe will now be at C:\ffmpeg\ffmpeg-6.1.1-full_build\bin\ffmpeg.exe.
+Add to PATH:
+Press the Windows Key, type env, and select "Edit the system environment variables".
+Click "Environment Variables...".
+Under "User variables", select the Path variable and click "Edit...".
+Click "New" and paste the path to the bin folder: C:\ffmpeg\ffmpeg-6.1.1-full_build\bin.
+Click OK on all windows.
+Verify: Close and reopen all terminal windows (including VS Code's terminal). In a new terminal, run ffmpeg -version. If you see version info, it is working.
+
+-- Run API 
+cd C:\IET\OtherCustomers\Connect-OfficerInsights\Code\backend
+
+pip install -r requirements.txt
+python -m uvicorn main:app --reload (Run in admin mode to run ffmpeg)
+
+-- Run UI
+cd C:\IET\OtherCustomers\Connect-OfficerInsights\Code\frontend
+ng serve --open
+
+Public Server:
+http://43.204.127.40:4200/ -> http://[new-server-ip]:4200
+http://43.204.127.40:8000/ -> http://[new-server-ip]:8000
+
+
+
+-- TO RUN API on HTTPS:
+1. openssl req -x509 -newkey rsa:4096 -nodes -out "c:\IET\connect-cert-1.pem" -keyout "c:\IET\connect-key-1.pem" -days 3650 -subj "/CN=10.102.176.137"
+ -- this IP should be server IP on which API is Running
+ 
+2. Copy thie .pem files to backend folder
+
+3. uvicorn api:app --env-file .env --host 10.102.176.137 --port 8000 --reload --ssl-keyfile ./connect-local-key.pem --ssl-certfile ./connect-local-cert.pem
+
+
+
+# Requirements:
+ePNB (Electronic Pocket Notebook ) - a chat interface that can process natural language entries (via voice or keyboard), establish intent, identify entities, handle relationships between them (like a Driver and their Vehicle), and structure the output.
+
+# NOT PART OF POC
+As per requirement doc, we need to store and retrieve as well. DB, LIST, VIEW, NAVIGATION, etc etc
+
+
+
+
+TECH STACK:
+-----------------
+
+Frontend:
+	Angular
+	
+Backend:
+	Python (with FastAPI)
+	API Server (Uvicorn)
+	ffmpeg-python (convert .webm audio from the browser into .wav for Azure)
+	
+Azure Cloud Services:
+	Azure Speech to Text Service
+	Azure OpenAI Service (gpt-4.1)
+	
+___________________________________________________________________
+	
+	
+Use cases to demo:
+_________________
+1. positive flow with all details
+1. positive flow - input having only 'today' (without date) - failing earlier, hallucinating date, fixed now
+2. 
+
+Issues faced:
+---------------
+1. gpt-4o-mini not good for entity extraction. sometimes work, and sometimes doesn't. 
+2. need to do post-processing to handle schema validation, handle date like today, yesterday, etc, which is not handled by prompt efficiently
+3. speech: when I say 'TOR', it transcribe as 'tour'. they sound identitical. Without context, the speech service will almost always default to the more common English word, "tour". Solution: use phrase list, it is basically the domain specific words and acronyms that you give to the speech recognizer. When the service hears audio that could be "TOR" or "tour", it will see "TOR" on your list and give it a much higher probability of being the correct transcription.
+
+
+Pending:
+-----------
+1. get cost for gpt-4o-mini vs gpt-4.1
+2. cross-verify solution with the requirements
+
+
+#Issues with browser's built-in Web Speech API:  its accuracy is highly inconsistent across different accents, browsers, and operating systems.
+Solution: server-side speech-to-text service. Use "Azure Speech to Text". It is a world-class service specifically designed to handle multiple languages and a wide variety of accents with extremely high accuracy.
+
+
+
+
+## Officer Insights Questions
+
+Traffic Offence Report:
+Offence occurred at 10:00 am on 15/05/2025. Driver name is James Smith, he is male born 12/02/2000. Address 1, High Street, Slough, Location of Offence Oxford Road, Cheltenham, Vehicle Registration OU182FB a blue BMW 420, Offence is No Seat Belt
+
+
+Example 1: Stolen Vehicle Report (with follow-up)
+Officer: "I need to report a stolen car. It's a silver Ford Fiesta, reg WP19 ABC. It was taken from Baker Street in London."
+Officer: "The owner is John Williams. He last saw it last night around 10 pm."
+
+Example 2: Witness Statement
+Officer: "Take a witness statement. The witness is Jane Doe, contact 07123456789. She saw a man in a red hoodie grab a handbag from a lady and run away."
+Officer: "At the Tesco on Main Street, Bristol, about 10 minutes ago."
+
+_____________________________________________________________
+
+Intent 1: Traffic Offence Report
+--------------------------------
+A. Complete Information (All required fields present)
+1. Record a traffic offence report. The offence happened today, May 26th 2024, at 14:30. The driver is a Mr. Peter Jones, date of birth 05/08/1985, male. His address is 12 Appleby Court, Manchester. The offence location was on the A6, Stockport. The vehicle is a red Ford Transit, reg plate MT21 FJU. The offence was driving while using a mobile phone.
+
+2. I need to issue a TOR. Offence was for 'No Seat Belt' and it occurred at 9:00 AM on 25/05/2024 on London Road, Reading. The driver was a female, Sarah Jenkins, born 22/11/1992, who lives at 3 Priory Lane, Reading. The car was a silver Vauxhall Corsa, registration SJ22 HKL.
+
+3. Let's log a traffic violation. Time was today at 17:00. Location of offence: M4 Eastbound, Swindon. Vehicle: a black Audi A3, reg number AV19 GHY. Driver: Thomas Wright, male, DOB 15/03/1978, of 101 New Street, Bristol. Offence was speeding, recorded at 95 mph in a 70 zone.
+
+4. Traffic offence report for you. A blue BMW 320d, registration BU68 ZKO, was stopped for having no insurance. The stop was on Princes Street, Edinburgh, at 23:15 on 23/05/2024. The driver is a Mr. Ali Khan, male, born 01/02/2001, address is 45 George Street, Edinburgh.
+
+5. Log this please: driving without due care and attention. Offence date: 20/05/2024 at 12:00 PM. Offence location: Corporation Street, Birmingham. Driver: Emily Davis, female, DOB 10/06/1999, of 7 Park View, Birmingham. Her car is a white Fiat 500, registration EM19 PWD.
+
+B. Incomplete Information (Some required fields missing)
+1. Query: "I've stopped a vehicle on the M25 near Heathrow for speeding. It's a grey VW Golf, registration GK20 VBN."
+Missing: Offence date/time, Driver details.
+Expected AI Question: "Understood. Can you please provide the date and time of the offence, and the driver's details?"
+User's Follow-up Answer: "The offence was today, May 26th 2024, at 4:15 PM. The driver is a Mr. Alan Partridge, male, born 02/04/1965, lives at 1 Linton Travel Tavern, Linton."
+
+2. Query: "Traffic stop. Driver is John Smith, born 12/02/2000, male, of 1 High Street, Slough. He was stopped on Oxford Road, Cheltenham."
+Missing: Offence date/time, the specific offence, vehicle details.
+Expected AI Question: "Okay, I have the driver's details. What was the specific offence, what were the vehicle details, and when did this occur?"
+User's Follow-up Answer: "The offence was 'Driving without due care and attention'. It happened today, May 26th, at 4:20 PM. His vehicle is a silver Lexus, registration H20 LPR."
+
+3. Query: "I'm reporting a driver for running a red light at 3 PM today, May 26th. The car was a red Toyota Yaris."
+Missing: Driver details, vehicle registration, specific offence location.
+Expected AI Question: "Okay, reporting a red light offence. What was the vehicle's registration number, the location of the offence, and the driver's details?"
+User's Follow-up Answer: "The registration is RY55 TYA. The location was the junction of High Street and Park Lane in Bristol. The driver was a female, Jessica Rabbit, born 11/11/1988, from 1 Ink and Paint Club, Toontown."
+
+4. Query: "Report for no seatbelt. Vehicle is a white Ford Transit, reg MA23 LOR, on Deansgate in Manchester today at 11:00 AM. Driver is David Chen, born 14/07/1988."
+Missing: Driver's address and sex.
+Expected AI Question: "I have most of the details for David Chen. What is his address and sex?"
+User's Follow-up Answer: "He is a male. His address is 5 Willow Way, Salford."
+
+5. Query: "Offence occurred at 10:00 am on 15/05/2025. Driver name is James Smith, male, DOB 12/02/2000. Address 1 High Street, Slough. Location of Offence Oxford Road, Cheltenham. Vehicle is a blue BMW 420, registration OU182FB."
+Missing: The specific offence.
+Expected AI Question: "I have the driver, vehicle, and location details. What was the specific traffic offence?"
+User's Follow-up Answer: "The offence was having no valid MOT certificate."
+
+
+_____________________________________________________________
+Intent 2: Investgation Report
+----------------------------
+A. Complete Information
+
+1. Scenario 2: Burglary with Suspect Van
+There was a break-in at Café Nero, 34 Station Road, Manchester, on 1st July 2025 at 02:00.
+The victim is Laura Jane Green, female, born 22/08/1990, living at 14 Beech Street, Manchester.
+A white Mercedes Sprinter, plate YK65 HGF, believed to be stolen, was found nearby.
+A grey van, possibly a Citroen Berlingo, reg plate LG09 XZP, is suspected to be used by the offenders.
+
+2. Scenario 3: Motorcycle Theft from Parking Garage
+On 28/07/2025 at 21:45, a Yamaha R6, blue, reg plate NG08 KPL, was stolen from Bay 5, Parking Level 3, Grand Mall, Birmingham.
+Victim: David Allan Parker, born 10/11/1975, male, lives at 22 Ivy Lane, Birmingham.
+A black Vauxhall Corsa with reg JH10 TTR was spotted near the area and is suspected.
+
+3. Scenario 4: Theft from Business Property
+At 10:15 on July 24, 2025, several tools were stolen from the warehouse at Unit 8, Industrial Estate, Glasgow.
+Victim: Michael James Thomson, male, born 15/05/1982, address: Flat 4, 99 Park Avenue, Glasgow.
+The stolen vehicle was a white Transit van, reg BX14 LPD.
+A silver Honda Civic, plate RE12 VTY, was suspected in the area.
+
+4. Scenario 5: Attempted Theft – No Vehicle Stolen
+Attempted theft took place at 17 Hillcrest View, York, around 05:30 on 27 July 2025.
+Victim is Samantha Rose Clark, born 03/02/1985, female, lives at 17 Hillcrest View, York.
+No vehicle was stolen, but a dark green Skoda Octavia, reg PC11 FGU, is a suspect vehicle.
+
+5. Scenario 1: Stolen Car from Residential Driveway:
+On 30th July 2025 at 03:20, a Ford Fiesta with registration plate MT21 FJU, red in colour, was reported stolen from 12 Rosewood Close, Leeds.
+The victim, John Michael Smith, born 12/03/1980, male, resides at 12 Rosewood Close, Leeds.
+A suspect vehicle, black Audi A4, registration AB12 XYZ, was seen leaving the premises named Rosewood House.
+
+
+
+B. Incomplete Information
+Scenario 6: Unknown Suspect Vehicle
+On 26/07/2025 around 22:10, a silver BMW 3 Series with plate MH20 JKL was reported stolen from 54 Oakridge Avenue, Bristol.
+Victim: James William Gray, born 18/06/1988, male, lives at 54 Oakridge Avenue, Bristol.
+No details about the suspect vehicle are available at the moment.
+
+Scenario 7: Missing Time
+A burglary occurred on July 25th at Cafe Delight, 77 Main Street, Sheffield.
+Victim is Anna Victoria Lewis, female, born 14/04/1993, lives at 20 Maple Crescent, Sheffield.
+Stolen car: white Fiat 500, reg KP13 UYC.
+Suspect car is a black Ford Focus, reg WX64 LTY.
+
+Scenario 8: Partial Victim Address
+On July 29th 2025 at 01:15, a red Mini Cooper, reg RJ09 AKT, was stolen from 7 Kingsley Road, Nottingham.
+Victim is Craig Foster, male, born 05/01/1990, living at 7 Kingsley Road (town unknown).
+Suspect vehicle: silver Renault Megane, reg AB17 CVY.
+
+Scenario 9: No Date of Birth
+At 04:30 today, a burglary took place at 101 Queens Parade, London.
+Victim is Rachel Marie Evans, female, address: 101 Queens Parade, London.
+A blue Nissan Juke, reg GU16 APE, was reported stolen.
+Suspect vehicle unknown.
+
+Scenario 10: Incomplete Vehicle Details
+On 30 July 2025 around 06:00, an unknown suspect broke into The Green House, 88 Fern Avenue, Oxford.
+Victim: Steven Lloyd Carter, born 17/09/1979, male, lives at 88 Fern Avenue, Oxford.
+A suspect vehicle, plate ND19 UJX, was observed but no make or model is known.
+No stolen vehicle was reported.
+
+_____________________________________________________________________
+
+
+Unsupported Intent:
+---------------------
+what is the date?
+log my patrol hours
+Stop & Search Report: Record a stop and search. Time was 14:30 today at Piccadilly Gardens, Manchester. Subject was a white male, approx 25 years old, slim build, wearing a black tracksuit. Grounds for search were Section 23 Misuse of Drugs Act due to a strong smell of cannabis. The outcome was nothing found.
+
+
+
+
+
+_________________________________________________
+Intent 3: Witness Statement
+----------------------------
+A. Complete Information
+"Taking a witness statement for incident 54321. Witness is Mary Poppins, contact number 07700900123. The incident was an assault she saw today at 13:00 at the bus stop on Coronation Street, Salford. Her statement is: 'I saw two men arguing, and then one of them punched the other in the face.'"
+"I need to log a witness account. Witness name: David Jones, phone 07812345678. He saw a theft from a vehicle at the Tesco car park on Station Road, Cambridge, just now at 4:00 PM on May 26th. He said, 'A youth in a grey hoodie smashed the car window and stole a laptop from the passenger seat.'"
+"Witness statement for an affray. Witness is Susan Bell, contact 07987654321. She saw it outside the 'The Red Lion' pub on High Street, York, last night around 23:30. Statement: 'A large group of men were shouting and fighting in the street. It was very violent.'"
+"Let's get this witness statement down. It's for incident reference 123-26052024. The witness is Brian Smith, phone 07111222333. He saw criminal damage to a phone box on Queen Street, Cardiff, today at 15:00. His statement is 'I saw a teenager kicking the glass of the phone box until it shattered.'"
+"Record a witness statement. Witness: Chloe Taylor, number 07555444333. Location: inside the train station, Sheffield. Time: today around 08:30. Incident: theft. Statement: 'I saw a man snatch a phone out of a woman's hand and run towards the exit.'"
+
+
+B. Incomplete Information
+1. Query: "I have a witness to a robbery. Her name is Brenda Evans, and her number is 07999888777. She says 'the man had a knife and demanded the shopkeeper open the till'."
+Missing: Incident location and date/time.
+Expected AI Question: "I have the witness details and statement. Where and when did this robbery take place?"
+User's Follow-up Answer: "It happened at the 'Corner Shop' on Albert Square, Walford, about half an hour ago, so around 4:30 PM today, May 26th."
+
+2. Query: "I'm at the scene of a public order offence on Market Street, Manchester that happened about five minutes ago. A man has come forward to give a statement."
+Missing: Witness details (name, contact) and their statement text.
+Expected AI Question: "Okay, I'm ready to record the statement for the incident on Market Street. What are the witness's name and contact number, and what is their statement?"
+User's Follow-up Answer: "The witness is Ken Barlow. His phone number is 07123 123 123. His statement is: 'I saw two youths shouting at each other, then one of them pushed the other, causing him to fall into a shop window.'"
+
+3. Query: "A witness, Mark Fletcher, has provided a statement about a burglary he saw on Green Lane in Liverpool this morning. His contact is 07123123123."
+Missing: The actual statement text.
+Expected AI Question: "I have the witness and incident details. What is Mark Fletcher's statement?"
+User's Follow-up Answer: "His statement is: 'I was walking my dog when I saw a man dressed in black use a crowbar to force open the back window of number 22. He climbed inside.'"
+
+4. Query: "Taking a statement from a Jane Doe regarding an assault at the park in Bristol today. She said 'He pushed her to the ground'."
+Missing: Witness contact number.
+Expected AI Question: "Understood. What is Jane Doe's contact number?"
+User's Follow-up Answer: "Her contact number is 07700 900 456."
+
+5. Query: "Incident reference 999. The witness is Jane Doe, phone 07123456789. The statement is 'I saw a man in a red hoodie grab a handbag from a lady and run down the alley.' It happened today at 3 PM."
+Missing: Incident location.
+Expected AI Question: "I have the witness statement. Where did this incident occur?"
+User's Follow-up Answer: "The incident happened at the entrance to the Arndale Shopping Centre in Manchester."
+
+
+______________________________________________________________
+Intent 3: Stolen Vehicle Report
+--------------------------------
+A. Complete Information
+"Report of a stolen vehicle. The owner is Mr. Arthur Weasley, and he's reporting his Ford Anglia, registration EN7990, stolen. It's light blue. He last saw it parked on his street, Privet Drive, in Little Whinging, last night around 8 PM."
+"Log a stolen vehicle. It's a grey VW Transporter van, reg DE22 XYZ. The owner is a company, 'Efficient Electrics'. It was stolen from a building site on New Road, Leeds, sometime this morning, May 26th."
+"I'm with the victim of a car theft, Mrs. Eleanor Vance. Her black Range Rover, reg EV23 ABC, was stolen from the driveway of her house at 1 Hill House, Shirley, overnight last night."
+"Stolen motorcycle report. It's a red Ducati Panigale, reg DU21 PAN. The owner, James Bond, saw it last at 10 PM yesterday evening, parked in the underground car park at his apartment block on Vauxhall Bridge Road, London."
+"Okay, taking a stolen vehicle report. Owner is Lucy Pevensie. Vehicle is a white Peugeot 208, registration LP20 CSR. It was stolen from the NCP car park on Wardrobe Street, Lancaster, this afternoon, May 26th."
+
+
+B. Incomplete Information
+1. Query: "I'm taking a report for a stolen silver Ford Fiesta, registration WP19 ABC."
+Missing: Owner's name, last seen location, date/time of theft.
+Expected AI Question: "Okay, I have the vehicle details. Who is the owner, and where and when was the vehicle last seen?"
+User's Follow-up Answer: "The owner is Basil Fawlty. He last saw it parked outside his hotel on 16 Elwood Avenue, Torquay, yesterday evening at around 11 PM."
+
+2. Query: "The owner, John Williams, is reporting his vehicle stolen from outside 22 Baker Street, London. He last saw it last night at 10 pm."
+Missing: Vehicle details (make, model, colour, registration).
+Expected AI Question: "I have the owner and location details. Can you provide the make, model, colour, and registration mark of the stolen vehicle?"
+User's Follow-up Answer: "It's a blue Morris 1100. The registration is WSH 91G."
+
+3. Query: "A blue Honda Civic, registration BL21 JKL, has been reported stolen by its owner, Fatima Ahmed."
+Missing: Last seen location and date/time.
+Expected AI Question: "Understood. Where and when did Fatima Ahmed last see her vehicle?"
+User's Follow-up Answer: "She last saw it on her driveway at 34 Oak Tree Road, Leicester, this morning at 8 AM."
+
+4. Query: "Stolen vehicle report. A white delivery van, registration YD23 FGH, was taken from an industrial estate in Milton Keynes about an hour ago."
+Missing: Owner's name/details.
+Expected AI Question: "Okay, I've noted the vehicle and location. Who is the registered owner of the van?"
+User's Follow-up Answer: "The owner is 'Pat's Special Delivery Service'."
+
+5. Query: "I need to report a stolen car. Make: Audi, Model: A4, Colour: Black. It was taken from Oxford Street, London, yesterday."
+Missing: Vehicle registration mark, owner's name.
+Expected AI Question: "I have the vehicle description. What is the vehicle's registration mark and who is the owner?"
+User's Follow-up Answer: "The registration is AU68 TTR. The owner is a Mr. Rick Deckard."
+
+______________________________________________________________
+Intent 4: Stop and Search Record
+----------------------------------
+A. Complete Information
+"Record a stop and search. Time was 14:30 today at Piccadilly Gardens, Manchester. Subject was a white male, approx 25 years old, slim build, wearing a black tracksuit. Grounds for search were Section 23 Misuse of Drugs Act due to a strong smell of cannabis. The outcome was nothing found."
+"Log a stop search. Occurred at 01:00 on May 26th outside a nightclub on Broad Street, Birmingham. Subject was a black male, around 20, tall, wearing a dark blue hoodie. Grounds were Section 1 of PACE, suspected of carrying stolen goods after a theft report nearby. Outcome: a stolen iPhone was recovered and the male was arrested."
+"Stop and search record. Location: Bristol Temple Meads station entrance, 18:00 today. Subject: white female, 30s, short blonde hair, carrying a large backpack. Grounds: Section 47 of the Firearms Act, based on intelligence she may be carrying a weapon. Outcome: Search was negative, nothing found."
+"I need to record a stop and search. It was at 20:45 this evening on the high street in Camden, London. Subject was a male of Asian appearance, early 20s, wearing a red baseball cap. The grounds were Section 23 of the Misuse of Drugs Act, as he was seen exchanging small packages. The outcome was a small amount of cannabis found, dealt with by a community resolution."
+"Log this search please. 11:00 AM today, Kelvingrove Park, Glasgow. Subject was a white male, late teens, thin build, dressed in all black. Grounds: Section 60 of the Criminal Justice and Public Order Act authorisation was in place. He was searched to prevent serious violence. Outcome was negative."
+
+
+B. Incomplete Information
+1.Query: "I conducted a stop and search at 16:20 today on a white male in his 40s on Argyle Street, Glasgow."
+Missing: Grounds for the search and the outcome.
+Expected AI Question: "Okay, I've noted the time, location, and subject. What were the grounds for the search and what was the outcome?"
+User's Follow-up Answer: "The grounds were Section 23 Misuse of Drugs Act, as he matched the description of a person seen dealing drugs nearby. The outcome was negative, nothing found."
+
+2. Query: "Stop search conducted under Section 1 of PACE for suspected stolen property. The subject was a teenager in a grey tracksuit. Location was the Arndale Centre, Manchester, at 15:00 today."
+Missing: The outcome of the search.
+Expected AI Question: "I have the details of the search. What was the final outcome?"
+User's Follow-up Answer: "The outcome was a negative search. Nothing was found on the person."
+
+3. Query: "The search of a male at Notting Hill Gate station at noon today was negative for any items."
+Missing: Subject description and the grounds for the search.
+Expected AI Question: "Okay, a negative search at Notting Hill Gate. Can you provide a description of the subject and the grounds for the search?"
+User's Follow-up Answer: "The subject was a black male, around 18 years old, wearing a grey hoodie. The grounds were Section 1 of PACE, as he was seen running from the direction of a reported robbery."
+
+4. Query: "I've just conducted a search under the Misuse of Drugs Act due to the smell of cannabis. A small bag of cannabis was found. It was at 19:00 on Bold Street, Liverpool."
+Missing: Subject description.
+Expected AI Question: "Understood. Can you please provide a description of the person who was searched?"
+User's Follow-up Answer: "The subject was a white female, early 20s, with long red hair, wearing a green coat."
+
+5. Query: "Stop and search record. Grounds: Section 23 MDA. Outcome: Negative. Subject: White male, 20s, brown hair, blue jacket. Time: 2 PM today."
+Missing: Location of the stop and search.
+Expected AI Question: "I have all the details for the search record. Where did this stop and search take place?"
+User's Follow-up Answer: "The search took place on Old Compton Street in Soho, London."
+
+
+
+
+________________________________________________________________
+
+TECH STACK:
+-------------
+
+Frontend:
+	Angular
+	
+Backend:
+	Python (with FastAPI)
+	API Server (Uvicorn)
+	ffmpeg-python (convert .webm audio from the browser into .wav for Azure)
+	
+Azure Cloud Services:
+	Azure Speech to Text Service
+	Azure OpenAI Service (gpt-4.1)
+	
+	
+___________________________________________________________________
+
+Azure Services Pricing:
+-------------------------
+Azure AI Speech API:
+	Region: UKSouth, Instance: Standard, Category: Speech To Text -> $1/audio hour
+	
+Azure Open AI Service (Chat Completion):
+	Language Models, Standard (On-Demand), GPT-4-8K, 1 x 1,000 input tokens, 1 x 1,000 output tokens -> $0.09
+	(1 x 1,000 input tokens = $0.03, 1 x 1,000 output tokens = $0.06)
+
+
+___________________________________________________________________
+
+
+Category	Technology / Library	Purpose
+Frontend Framework	Angular 18+	The core framework for building the single-page application (SPA).
+UI Components	Angular Material	Provides professional, pre-built UI components (cards, buttons, icons, toolbar, etc.).
+Backend Framework	Python 3.11+ with FastAPI	Creates the high-performance, modern API for the backend.
+Speech-to-Text	Azure Speech to Text Service	Provides highly accurate, accent-aware transcription of the officer's voice input.
+AI Processing	Azure OpenAI Service (gpt-4o-mini)	Powers the natural language understanding, intent recognition, and entity extraction.
+Audio Conversion	ffmpeg-python (Backend)	A Python wrapper for FFmpeg used to reliably convert .webm audio from the browser into .wav for Azure.
+Date/Time Parsing	dateparser (Backend)	A Python library used in the clean_tool_args function to intelligently parse natural language dates.
+Data Validation	Pydantic (Backend)	Used to define the data schemas (schemas.py) and validate/sanitize the AI's JSON output.
+API Server	Uvicorn	An ASGI server that runs the FastAPI application.

@@ -1,0 +1,73 @@
+<!-- src/app/app.component.html -->
+<div class="page-container">
+  <!-- Main Header -->
+  <mat-toolbar class="main-header">
+    <div class="logo-title">
+      <img src="assets/images/logo.svg" alt="App Logo" class="header-logo">
+      <span class="main-title">Officer Insights</span>
+    </div>
+    <span class="spacer"></span>
+    <button mat-icon-button class="new-report-button" (click)="reset()" title="New Report" color="primary" >
+      <mat-icon>note_add</mat-icon>
+  </button>
+  </mat-toolbar>
+
+  <!-- Main Content Area (Scrollable) -->
+  <main #mainContent class="main-content">
+    <div class="chat-window">
+      <!-- Welcome Message -->
+      <div class="message assistant">
+        <div class="bubble-wrapper"><div class="bubble">Hello Officer! I'm here to help you create traffic offense or investigation reports. You can type your report or use the microphone to record your statement.</div><div class="author-label"><img src="assets/images/assistant-icon.svg" alt="assistant icon"><span>Assistant</span></div></div>
+      </div>
+      <!-- Dynamic Messages -->
+      <div *ngFor="let message of messages" class="message" [ngClass]="message.role">
+        <ng-container *ngIf="message.role === 'assistant'">
+          <div class="bubble-wrapper">
+          <div class="bubble" [ngClass]="{'error-bubble': message.isError}" [innerHTML]="message.content"></div>
+          <div class="author-label">
+            <mat-icon *ngIf="message.isError" class="error-icon">warning_amber</mat-icon>
+            <img *ngIf="!message.isError" src="assets/images/assistant-icon.svg" alt="assistant icon">
+            <span>Assistant</span>
+          </div>
+        </div>
+      </ng-container>
+        <ng-container *ngIf="message.role === 'user'"><div class="bubble-wrapper"><div class="bubble">{{ message.content }}</div><div class="author-label"><span>You</span><mat-icon>person</mat-icon></div></div></ng-container>
+      </div>
+      <!-- Loading Spinner -->
+      <div *ngIf="isLoading" class="message assistant"><div class="bubble-wrapper"><div class="bubble"><mat-progress-spinner mode="indeterminate" diameter="24"></mat-progress-spinner></div></div></div>
+      <!-- Final Report -->
+      <div *ngIf="finalReport" class="report-card-container"><mat-card class="report-card"><mat-card-header><mat-card-title>{{ reportTitle }}</mat-card-title><mat-card-subtitle>Review the extracted information below.</mat-card-subtitle></mat-card-header><mat-card-content><pre>{{ finalReport | json }}</pre></mat-card-content></mat-card></div>
+
+      <div #chatAnchor></div>
+    </div>
+  </main>
+      
+  <!-- Input Footer -->
+  <footer class="input-area">
+    <div class="footer-state-container">
+      <!-- STATE 1: Default view -->
+      <ng-container *ngIf="!isLoading && !isListening">
+        <mat-form-field appearance="outline" class="input-field">
+          <textarea #inputTextArea matInput placeholder="Type or use the mic..." cdkTextareaAutosize cdkAutosizeMinRows="3" cdkAutosizeMaxRows="8" [(ngModel)]="userInput" (keydown)="handleKeydown($event)"></textarea>
+        </mat-form-field>
+        <button mat-fab color="primary" class="mic-button" (click)="toggleListen()" title="Dictate"><mat-icon>mic</mat-icon></button>
+        <button mat-fab color="primary" class="action-button send-button" (click)="sendTextForProcessing()" [disabled]="!userInput.trim()" title="Send"><mat-icon>send</mat-icon></button>
+      </ng-container>
+
+      <!-- STATE 2: View while actively listening -->
+      <div *ngIf="isListening" class="listening-container">
+        <span>Listening...</span>
+        <span class="spacer"></span>
+        <button mat-icon-button color="warn" class="mic-button" (click)="cancelRecording()" title="Cancel Recording"><mat-icon>close</mat-icon></button>
+        <button mat-icon-button color="primary" class="mic-button" (click)="toggleListen()" title="Stop and Transcribe"><mat-icon>check</mat-icon></button>
+      </div>
+      
+      <!-- STATE 3: Unified Loading/Processing View -->
+      <div *ngIf="isLoading" class="processing-container">
+        <span>{{ loadingMessage }}</span>
+        <span class="spacer"></span>
+        <button mat-icon-button color="warn" class="mic-button" (click)="cancelRequest()" title="Cancel Request"><mat-icon>cancel</mat-icon></button>
+      </div>
+    </div>
+  </footer>
+</div>

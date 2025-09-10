@@ -1,0 +1,302 @@
+Q: for Adam:
+1. Difference between Location Radius and GeoFence? Where this geofence will be used in the system?
+- LocationRadius can be used by the end user if that user enter withing that radius, why geofence?
+
+
+
+
+Phase 1b - Add Support/Connector for RMS/HR to integrate with Staff/Team data.
+
+RMS and HR are separate systems. 
+Each of these systems, RMS and HR, will possess APIs that can fetch staff and team data for integration with the Demand Creation app. 
+The staff and team data will be handled by an admin user through the Admin console. 
+The primary objective of this phase is to integrate the staff and team fields from the RMS and HR systems.
+4.	Both the RMS and HR systems will have APIs for staff/teams, which will be integrated with the staff/teams data in the Community Insights database.
+
+Phase 2	- Remaining work on RMS Connector to implement Events/Tasks into the App, remaining aware of PDS standards & staying agnostic of Connect in the main Solution.
+It consists of two parts - 
+The validation of “Staff/Team” and “Related Person” data with the RMS system.
+The integration of Events data with the RMS system.
+
+"Staff/Team" and "Related Person" Validation with RMS system:
+--------------------------------------------------------------------
+Demand Creation app - While a super-user is creating demand, the app will activate the RMS API to validate staff or teams.
+e.g. a super-user will create demand, enter the ownership individual/team, and if the ‘staff/team validation source’ flag is enabled in the demand configuration, the ownership individual/team will be validated with RMS API. This will allow the super-user to add staff or team accordingly.
+
+Demand Creation app - A super-user can add one or more related persons against the demand. The super-user will enter related person information and validate it with the RMS API. The RMS API will return the related person information that matches the search data. User will select the correct one from the response and create the demand.
+
+RMS will possess APIs that can validate staff/team
+
+
+
+Integration of Events with RMS system:
+----------------------------------------
+1. Events will be sourced from RMS or CAD. The term event and task are interchangeable in terms of the functionality.
+2. The Community Insights app will be enhanced to capture event data with additional fields. However, this event data/fields will not be visible to the super user on Demand Creation app.
+3. Users will only have the ability to edit the event, as the event data will be imported from RMS.
+4. Insights app should retrieve only those events that have information like location and event hours and this information will be stored in the Community Insights database.
+5. When a user logs into the Community Insights app, the events nearest to the user’s location will be displayed.
+6. What are Event Classification?
+7. What are Event Inclusions?
+8. What is PDS standards?
+
+
+
+
+
+Phase 1	- Initial Apps & support for Demands.
+
+Phase 1b - Add Support/Connector for RMS/HR to integrate with Staff/Team data.
+Assumptions:
+The RMS and HR are distinct systems.
+Each system, RMS and HR, will have two separate API endpoints to retrieve data for staff and teams.
+The staff API endpoint will provide the following details: i. A unique identifier such as a staff number ii. First name iii. Surname iv. Rank v. Force ID
+The team API endpoint will provide the following details: i. A unique identifier such as a team reference ii. Team name iii. Force ID
+The Insight App’s adapter will connect to the RMS and HR API endpoints at regular intervals. It will retrieve staff and team data and store or update this information in the Community Insights database.
+An admin user will manage the staff and team data via the Admin console.
+Are there additional requirements for Phase 1b?
+
+
+Phase 2	- Remaining work on RMS Connector to implement Events/Tasks into the App, remaining aware of PDS standards & staying agnostic of Connect in the main Solution.
+Assumptions:
+
+"Staff/Team" and "Related Person" Validation with RMS system:
+--------------------------------------------------------------
+1. There will be additional two API endpoints in RMS to validate staff and team. These endpoints will accept inputs such as staff numbers or team references and return a response of true or false.
+2. While a super-user is creating demand, the Demand Creation app will activate the above RMS API endpoints to validate staff or teams. 
+e.g. a super-user will create demand, enter the ownership individual/team, and if the ‘staff/team validation source’ flag is enabled in the demand configuration, the ownership individual/team will be validated from the above RMS API endpoints. This will allow the super-user to add staff or team accordingly.
+3. An RMS API will be available to retrieve related person information based on a search request. The RMS API will respond with the following fields:
+RMS ID
+Surname
+Forename
+Date Of Birth
+Image
+Address-Number_Name
+Address-Street
+Address-Town_City
+Address-County
+Address-Country
+Address-PostalCode
+Risk Rating ID
+Risk Category ID
+4. A super-user can add one or more related persons against the demand. The super-user will enter related person information and validate it with the above RMS API endpoint. The RMS API will return the related person information that matches the search data. User will select the correct one from the response.
+
+Events from RMS:
+-----------------
+1. Events will be sourced from RMS or CAD. The term event and task are interchangeable in terms of the functionality.
+2. The Demands module on the Community Insights app will be enhanced to capture event data with additional fields. However, this event data/fields will not be visible to the super user.
+3. Users will only have the ability to edit the event, as the event data will be imported from RMS.
+4. There will be a separate API endpoint in RMS specifically for fetching events. The details of this can be addressed at a later stage.
+5. At regular intervals, the Insight App’s adapter will connect to the aforementioned RMS API endpoint to retrieve event data. We need to retrieve only those events that have information like location and event hours. This data will then be stored/updated in the Community Insights database.
+6. When a user logs into the Community Insights app, the events nearest to the user’s location will be displayed.
+7. Maintain event details in the DB 
+8. New event configuration module (or Insights Configuration) in admin console (similar to demand configuration). Config parameters -
+	i. Re-use parameter "max no. of demands" (same can be used to show max no. of events to user on Community Insights App)
+	ii. Event hours limit for each event type
+9. Add new parameter to the demand configuration in admin console. Accordingly add validations to demand insights and community insights app to handle max related person list.
+	i. Maximum Related Person results
+10. What are Event Classification?
+11. What are Event Inclusions?
+12. What is PDS standards?
+	
+	
+Phase 3	- Integrate CAD Connector to implement Events.
+
+"Staff/Team" and "Related Person" Validation with HR System:
+--------------------------------------------------------------
+Assumptions:
+1. There will be additional two API endpoints in HR to validate staff and team. These endpoints will accept inputs such as staff numbers or team references and return a response of true or false.
+2. While a super-user is creating demand, the Demand Creation app will activate the above HR API endpoints to validate staff or teams. 
+e.g. a super-user will create demand, enter the ownership individual/team, and if the ‘staff/team validation source’ flag is enabled in the demand configuration, the ownership individual/team will be validated from the above HR API endpoints. This will allow the super-user to add staff or team accordingly.
+3. An HR API will be available to retrieve related person information based on a search request. The HR API will respond with the following fields:
+HR ID
+Surname
+Forename
+Date Of Birth
+Image
+Address-Number_Name
+Address-Street
+Address-Town_City
+Address-County
+Address-Country
+Address-PostalCode
+Risk Rating ID
+Risk Category ID
+4. A super-user can add one or more related persons against the demand. The super-user will enter related person information and validate it with the above HR API endpoint. The HR API will return the related person information that matches the search data. User will select the correct one from the response.
+	
+	
+	
+     ii. user - edit demand -> user can add 1 or more staff members as 'Responders' to the activity and during this time, the selected staff member(s) should be validated from the RMS API and accordingly allow user can able to add staff/team (reference - Demand Update)
+	
+Event Record:
+Recent Event – Investigation 	
+•	Offence Classification Short Description 
+•	Event From Date/Time 
+•	Incident Location 
+•	Incident Summary 
+•	Victim 
+•	Surname 
+•	Forename 
+•	Date of Birth 
+•	Address 
+•	Suspect 
+•	Surname 
+•	Forename 
+•	Date of Birth 
+•	Address 
+•	OIC 
+•	Investigation Status 
+
+Recent Event - Intelligence 	
+·	Intelligence Report Title 
+·	Event From Date/Time 
+·	First Intelligence Report Location 
+·	Subject 
+o	Surname 
+o	Forename 
+o	Date of Birth 
+o	Address 
+·	Sanitised Intelligence Text 
+
+Recent Event – CAD Incident 	
+·	Incident Date/Time 
+·	Incident Reference 
+·	Incident Summary 
+·	Incident Classification 
+·	Incident Closing Code 
+·	Incident Location 
+
+
+Phase 0 Tasks - Get data from customer for Supplementary Datasets:
+-------------------------------------------------------------------
+Risk Categories
+Risk Ratings
+Demand Types
+Activities
+Activity Responses
+Staff Members (if not integrated with RMS/HR until phase 1b)
+Staff Teams (if not integrated with RMS/HR until phase 1b)
+
+Queries for phase 0:
+1. Until phase 1b is started, 
+	i. staff list and teams list will be entered from backend, right?
+
+2. Demand - How user will enter ownership - individual? I mean will user enter first name and the last name and then it will be validated with the stafflist?
+	
+2. Demand - related person against demand can't be captured until phase 2
+					
+3. Demand - Each demand can have multiple activities (choose from Activities master table)?
+4. Demand - Each activity can have single response, right?
+5. Demand - The demands to be shown based on the current datetime matching with the active days/time of the demand
+6. Demand - Once the user start edit the demand, other users can't open/edit that demand
+
+
+Demand Record:
+------------------------
+Demand ID
+Type - Individual Location Demand, Geographical Location Demand
+Ownership Type -> Individual, Team, Both
+Ownership – Individual	-> Verified Against User/HR List
+Ownership – Team	-> Verified Against User/HR List
+Demand Creation Date
+Demand Updated Date
+Demand State	-> Enabled / Disabled
+Demand Status	-> Active/Inactive/In Progress
+Start Date
+End Date
+Active Days
+Active Times
+Related Person 	-> There can be multiple Related Persons against a Demand. Max. defined in config
+Related Person – Surname
+Related Person – Forenames
+Related Person – DOB
+Related Person – Image 
+Related Person – Address
+Related Person – Risk Rating
+Related Person – Risk Category
+Related Person – ID
+Related Person – RMS ID
+Related Location (Specific) – Lat/Long
+Related Location (Specific) – Northing/Easting
+Related Location (Specific) – Radius 				-> In Metres, restricted via config
+Related Location (GeoFence) – Lat/Long points
+Related Location (GeoFence) – Area					-> In Sq. M, Max of this constrained by config
+Required Activities
+Required Activities – Activity Description
+Required Activities – Response 
+Required Activities - Notes
+Required Activities – Response Date
+Required Activities – Response Start Date
+Required Activities – Response End Date
+
+
+Demand Configuration:
+-----------------------------
+
+Reference Entries
+---------------------
+-	Demand Types
+-	Demand Actions (may be same as Activity table)
+-	Demand Responses
+-	Risk Categories
+-	Risk Ratings
+-	Staff List
+-	Team List
+
+Demand Configuration
+-----------------------
+-	Max Location Radius
+-	Max Geofence Area			- RR: Need to verify first with Adam if its required?
+-	Maximum Activities per Demand
+-	Staff / Team Validation source (1 or split option needed?)
+-	Location Validation Method & Detail (i.e. URI)
+-	ForceID
+-	Demand Reference Prefix
+- 	Demand Sequence Number		- Config Data (non-editable field on UI)
+-	Application Timeout
+-	Gazetter Connection URI		- Config Data (same as of Location Validation Method above)
+-	RMS Connection URI 			- Config Data
+-	HR Connection URI			- Config Data
+-	CAD Connection URI			- Config Data
+-	Max Related Persons			- Config Data
+-	Max records returned		- Config Data
+-	Max Zoom Level on Map		- Config Data
+
+
+Insights Configuration:
+--------------------------
+-	Maximum Responders
+-	Default Map Zoom
+-	Max Map Zoom				- covered above
+-	Min Map Zoom
+-	Maximum Records Shown		- covered above
+-	Application Timeout			- covered above
+
+
+Shared/Solution Config:
+-----------------------
+-	Application Timeout			- covered above
+
+Portal Config:
+--------------------
+-	Session Timeout				- will skip for now
+
+Splash Screen Config: This is to be common/shared across all usage requirements in Insights Apps
+----------------------
+- Splash Screen ‘prompt’ and disclaimer/declaration text to be controlled – on/off
+- App/Company Logo
+- App Name/Family Name – “Insights – Demands” or similar (per ‘App’ setting)
+-	Information / Description as to purpose of the Application
+-	Configurable ‘client’ logo
+-	Declaration of use/terms of agreement
+o	This should be ‘rich text’ to support Bold/Italic etc font controls.
+-	Accept/Proceed/Cancel/Reject buttons as appropriate.
+
+
+
+---IMPORTANT----
+** Note about ‘offline’ ….. If the user has already got to the ‘Detail’ screen and goes offline, the device / app should allow the user to select ‘edit’ and enter the details of the Activity Response (except adding responders) – but not ‘submitted’
+The responder detail can be additional later prior to saving once back online.
+
+Any detail entered here is accepted being subject to loss if the device loses memory prior to saving.
+

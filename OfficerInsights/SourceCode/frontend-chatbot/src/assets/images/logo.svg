@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 125" fill="none">
+  <!-- Main Shield Shape -->
+  <path fill="#003C70" d="M50 110C50 110 90 90 90 55V15L50 5 10 15v40c0 35 40 55 40 55z"/>
+  
+  <!-- White Inner Shield for Contrast -->
+  <path fill="#FFFFFF" d="M50 103C50 103 85 85 85 54V18L50 10 15 18v36c0 31 35 49 35 49z"/>
+  
+  <!-- Crown -->
+  <g fill="#003C70">
+    <!-- Crown Base -->
+    <path d="M25 45h50v5H25z"/>
+    <!-- Crown Arches -->
+    <path d="M25 45c0-15 25-20 25-20s25 5 25 20H25z"/>
+    <!-- Orb and Cross -->
+    <circle cx="50" cy="22" r="4"/>
+    <path d="M49 15h2v6h-2z"/>
+    <path d="M46 18h8v2h-8z"/>
+  </g>
+  
+  <!-- Checkerboard Pattern -->
+  <g fill="#005EA5">
+    <rect x="20" y="55" width="10" height="10"/>
+    <rect x="40" y="55" width="10" height="10"/>
+    <rect x="60" y="55" width="10" height="10"/>
+    <rect x="30" y="65" width="10" height="10"/>
+    <rect x="50" y="65" width="10" height="10"/>
+    <rect x="70" y="65" width="10" height="10"/>
+  </g>
+  <g fill="#FFFFFF">
+    <rect x="30" y="55" width="10" height="10"/>
+    <rect x="50" y="55" width="10" height="10"/>
+    <rect x="70" y="55" width="10" height="10"/>
+    <rect x="20" y="65" width="10" height="10"/>
+    <rect x="40" y="65" width="10" height="10"/>
+    <rect x="60" y="65" width="10" height="10"/>
+  </g>
+</svg>

@@ -1,0 +1,120 @@
+/* src/app/app.component.css */
+
+:host {
+  display: block;
+  height: 100dvh;
+  overflow: hidden;
+  background-color: #ffffff;
+}
+.page-container { display: flex; flex-direction: column; height: 100%; }
+.spacer { flex: 1 1 auto; }
+.main-header { flex-shrink: 0; background-color: #ffffff; padding: 0 16px; border-bottom: 1px solid #e0e0e0; height: 64px; }
+.logo-title { display: flex; align-items: center; }
+.header-logo { height: 32px; margin-right: 12px; color: #1877f2; }
+.main-title { font-size: 1.1rem; font-weight: 500; color: #05294a; }
+.new-report-button {
+  /* Mobile-first size: Standard 40px touch target */
+  width: 40px;
+  height: 40px;
+}
+.new-report-button mat-icon {
+  /* Standard 24px icon size */
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+}
+
+/* --- Main Content Area (Scrollable) --- */
+.main-content {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 0 16px;
+}
+
+.chat-window {
+  padding: 16px 0;
+}
+
+/* ... (message styles remain the same) ... */
+.message { display: flex; margin-bottom: 20px; max-width: 85%; align-items: flex-start; gap: 8px; }
+.message.user { margin-left: auto; flex-direction: row-reverse; }
+.bubble-wrapper { display: flex; flex-direction: column; width: 100%; }
+.bubble { padding: 12px 16px; border-radius: 18px; line-height: 1.5; background-color: #f1f2f6; color: #05294a; word-wrap: break-word; }
+.message.user .bubble { background-color: #1877f2; color: white !important; border-top-right-radius: 4px; }
+.author-label { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; color: #65676b; margin-top: 6px; }
+.message.user .author-label { justify-content: flex-end; }
+.author-label img { width: 20px; height: 20px; }
+.author-label mat-icon { width: 20px; height: 20px; font-size: 20px; background-color: #e4e6eb; border-radius: 50%; color: #65676b; }
+
+
+/* --- Input Footer --- */
+.input-area {
+  padding: 8px 16px !important;
+  display: flex;
+  align-items: center;
+  border-top: 1px solid #e0e0e0;
+  background-color: #ffffff;
+  flex-shrink: 0;
+  min-height: 72px; 
+  box-sizing: border-box;
+}
+
+/* This container will hold all possible footer states */
+.footer-state-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.input-field {
+  flex-grow: 1;
+}
+.mic-button { width: 56px !important; height: 56px !important; }
+.mic-button mat-icon { transform: scale(1.5); }
+.new-report-button mat-icon { transform: scale(1.5); }
+.action-button.send-button, .new-report-button { width: 48px !important; height: 48px !important; }
+
+/* --- Listening & Processing States --- */
+/* These now live inside a fixed-height parent, so they won't cause layout jumps */
+.listening-container, .processing-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  font-style: italic;
+  color: #65676b;
+}
+
+.error-bubble {
+  background-color: #FFFBEB !important; /* A light yellow background */
+  color: #92400E !important; /* A dark amber text color */
+  border: 1px solid #FDE68A; /* A soft yellow border */
+}
+
+.error-icon {
+  color: #D97706 !important; /* A strong amber/orange color for the warning icon */
+}
+
+/*
+============================================================
+DESKTOP REFINEMENTS
+============================================================
+*/
+@media (min-width: 768px) {
+  .main-header { height: 72px; padding: 0 32px; }
+  .main-content { padding: 0 32px; }
+  .message { max-width: 65%; }
+
+  .input-area {
+    padding: 16px 32px !important;
+    min-height: 88px; /* Slightly taller footer for desktop */
+    gap: 12px;
+  }
+  .input-field textarea { line-height: 1.5em; height: 1.5em; padding: 12px 20px !important; box-sizing: border-box; resize: none; overflow-y: auto !important;}
+  ::ng-deep .input-field .mat-mdc-form-field-flex { padding: 0 !important; }
+  ::ng-deep .input-field .mat-mdc-text-field-wrapper { border-radius: 28px !important; }
+  
+  .mic-button, .action-button.send-button, .new-report-button { width: 48px !important; height: 48px !important; }
+  .mic-button mat-icon { transform: scale(1.2); }
+  .new-report-button mat-icon { transform: scale(1.8); }
+}
